@@ -14,12 +14,14 @@ public class ChineseAddressParser {
     static final Pattern ms_Pattern_jinjiao = Pattern.compile("近郊");  
     static final Pattern ms_Pattern_sheng = Pattern.compile(reg + "+?省");  
     static final Pattern ms_Pattern_shi = Pattern.compile(reg + "+?市(?!场)");  
-    static final Pattern ms_Pattern_qu = Pattern.compile(reg + "+?区");  
+    static final Pattern ms_Pattern_qu = Pattern.compile(reg + "+?区");
+    static final Pattern ms_Pattern_zhou = Pattern.compile(reg + "?州");
+    static final Pattern ms_Pattern_meng = Pattern.compile(reg + "?盟");
     static final Pattern ms_Pattern_xiang = Pattern.compile(reg + "+?乡");  
     static final Pattern ms_Pattern_xian = Pattern.compile(reg + "+?县");  
     static final Pattern ms_Pattern_dao = Pattern.compile(reg + "+?道");  
     static final Pattern ms_Pattern_hutong = Pattern.compile(reg + "+?胡同");  
-    static final Pattern ms_Pattern_nongtang = Pattern.compile(reg + "+?弄堂");  
+    static final Pattern ms_Pattern_nongtang = Pattern.compile(reg + "+?(弄堂|弄)");  
     static final Pattern ms_Pattern_jie = Pattern.compile(reg + "+?街");  
     static final Pattern ms_Pattern_xiangg = Pattern.compile(reg + "+?巷");  
     static final Pattern ms_Pattern_lu = Pattern.compile(reg + "+?路");  
@@ -29,7 +31,7 @@ public class ChineseAddressParser {
     static final Pattern ms_Pattern_point = Pattern.compile(reg + "+?(?:广场|酒店|饭店|宾馆|中心|大厦|百货|大楼|商城)");  
     static final Pattern ms_Pattern_ditie = Pattern.compile("地铁" + reg + "+?线(?:" + reg + "+?站)?");  
     static final Pattern ms_Pattern_province = Pattern.compile(reg + "{2,10}?(?:省|特区|自治区|特别行政区)");  
-    static final Pattern ms_Pattern_city = Pattern.compile(reg + "+?(?:市|地区|自治州)");  
+    static final Pattern ms_Pattern_city = Pattern.compile(reg + "+?(?:市|地区|自治州|盟)");  
     static final Pattern ms_Pattern_county = Pattern.compile(reg + "+?(?:乡|县)");  
     static final Pattern ms_Pattern_street = Pattern.compile(reg + "+?街道");  
     static final Pattern ms_Pattern_road = Pattern.compile(reg + "+?(?:胡同|弄堂|街|巷|路|道)");  
@@ -41,6 +43,7 @@ public class ChineseAddressParser {
     static final Pattern ms_Pattern_number = Pattern.compile("[甲_乙_丙_0-9_-]+号");  
     static final Pattern ms_Pattern_plaza = Pattern.compile(reg + "+?(?:广场|酒店|饭店|宾馆|中心|大厦|百货|大楼|商城)");  
     static final Pattern ms_Pattern_underground = Pattern.compile("地铁" + reg + "+?线(?:" + reg + "+?站)?");  
+    
     static final Splitter ms_splitter_guo = new Splitter(ms_Pattern_guo, new Pattern[]{ms_Pattern_guo});  
     static final Splitter ms_splitter_sheng = new Splitter(ms_Pattern_sheng, new Pattern[]{ms_Pattern_province});  
     static final Splitter ms_splitter_shi = new Splitter(ms_Pattern_shi, new Pattern[]{ms_Pattern_city}, false);  
@@ -59,6 +62,9 @@ public class ChineseAddressParser {
     static final Splitter ms_splitter_hao = new Splitter(ms_Pattern_hao, new Pattern[]{ms_Pattern_number});  
     static final Splitter ms_splitter_point = new Splitter(ms_Pattern_point, new Pattern[]{ms_Pattern_plaza});  
     static final Splitter ms_splitter_ditie = new Splitter(ms_Pattern_ditie, new Pattern[]{ms_Pattern_underground});  
+    static final Splitter ms_splitter_zhou = new Splitter(ms_Pattern_zhou, new Pattern[]{ms_Pattern_city});
+    static final Splitter ms_splitter_meng = new Splitter(ms_Pattern_meng, new Pattern[]{ms_Pattern_meng});
+    
     static final Splitter[] ms_defaultsplitters = new Splitter[]{  
             ms_splitter_guo,  
             ms_splitter_sheng,  
@@ -77,7 +83,9 @@ public class ChineseAddressParser {
             ms_splitter_hao,  
             ms_splitter_point,  
             ms_splitter_ditie,  
-            ms_splitter_jinjiao  
+            ms_splitter_jinjiao,
+            ms_splitter_zhou,
+            ms_splitter_meng
     };  
   
     private static LinkedHashMap<Integer, Splitter> split(String src, Splitter[] splitters) {  
@@ -101,7 +109,7 @@ public class ChineseAddressParser {
         if (src.length() > 0) {  
             for (Integer key : splitterdic.keySet()) {  
                 Splitter value = splitterdic.get(key);  
-                if (key > index && key < src.length()) {  
+                if (key > index && key <= src.length()) {  
                     for (Pattern r : value.patterns) {  
                         s = segmentRecognize(src.substring(index, key), r);  
                         if (s != null) {  
@@ -147,9 +155,11 @@ public class ChineseAddressParser {
     }  
   
     public static void main(String[] args) {  
-        System.out.println(ChineseAddressParser.parse("北京市海淀区中关村北大街37号天龙大厦3层"));  
-        System.out.println(ChineseAddressParser.parse("福州市台江区群众路278号源利明珠大厦6楼"));  
-        System.out.println(ChineseAddressParser.parse("北京西城区百万庄大街68号6楼"));  
+        //System.out.println(ChineseAddressParser.parse("北京市海淀区中关村北大街37号天龙大厦3层"));  
+        //System.out.println(ChineseAddressParser.parse("福州市台江区群众路278号源利明珠大厦6楼"));  
+        //System.out.println(ChineseAddressParser.parse("北京西城区百万庄大街68号6楼"));  
+        System.out.println(ChineseAddressParser.parse("新疆维吾尔自治区喀什地区"));
+        System.out.println(ChineseAddressParser.parse("湖南省湘西自治州"));
     }  
   
     public static ChineseAddress parse(String source) {  
